@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wallet</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Times New Roman', Times, serif;
+      min-height: 100vh;
+    }
+
+    .root {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .corner { position: absolute; pointer-events: none; }
+    .c-tl { top: 32px; left: 32px; width: 100px; height: 100px; border-top: 2px solid #000; border-left: 2px solid #000; }
+    .c-br { bottom: 32px; right: 32px; width: 100px; height: 100px; border-bottom: 2px solid #000; border-right: 2px solid #000; }
+    .c-tr { top: 32px; right: 32px; width: 52px; height: 52px; border-top: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .c-bl { bottom: 32px; left: 32px; width: 52px; height: 52px; border-bottom: 1px solid #ccc; border-left: 1px solid #ccc; }
+
+    .site-label {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .35em;
+      color: #aaa;
+      text-transform: uppercase;
+      white-space: nowrap;
+      font-weight: 300;
+    }
+
+    .card {
+      position: relative;
+      width: 420px;
+      height: 420px;
+      flex-shrink: 0;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 40px 40px 36px;
+      z-index: 1;
+      animation: fadeUp .3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent #ddd transparent transparent;
+    }
+
+    /* Header */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .22em;
+      color: #aaa;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-bottom: 20px;
+      transition: color .15s;
+      width: fit-content;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { color: #000; }
+    .back-arrow { transition: transform .2s; display: inline-block; }
+    .back-btn:hover .back-arrow { transform: translateX(-3px); }
+
+    .step-label {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .3em;
+      color: #bbb;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-weight: 300;
+      flex-shrink: 0;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #000;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 34px;
+      font-weight: 300;
+      color: #000;
+      line-height: 1.1;
+      letter-spacing: -.01em;
+      font-family: 'Times New Roman', Times, serif;
+      margin-bottom: 22px;
+      flex-shrink: 0;
+    }
+
+    /* Scrollable content */
+    .wallet-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      scrollbar-width: none;
+    }
+    .wallet-body::-webkit-scrollbar { display: none; }
+
+    /* Section */
+    .section-label {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 9px;
+      letter-spacing: .3em;
+      color: #bbb;
+      text-transform: uppercase;
+      font-weight: 300;
+      margin-bottom: 8px;
+    }
+
+    /* Payment card tile */
+    .pay-card {
+      background: #000;
+      color: #fff;
+      border: 1px solid #000;
+      padding: 16px 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background .2s;
+    }
+
+    .pay-card::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.07);
+      pointer-events: none;
+    }
+
+    .pay-card::after {
+      content: '';
+      position: absolute;
+      top: -10px; right: 20px;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+
+    .pay-card:hover { background: #1a1a1a; }
+
+    .pay-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pay-card-bank {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+    }
+
+    .pay-card-chip {
+      width: 22px;
+      height: 16px;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 2px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    .pay-card-number {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      letter-spacing: .18em;
+      color: rgba(255,255,255,0.85);
+      font-weight: 300;
+    }
+
+    .pay-card-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .pay-card-label {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 9px;
+      letter-spacing: .2em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .pay-card-value {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11px;
+      letter-spacing: .1em;
+      color: rgba(255,255,255,0.7);
+    }
+
+    .pay-card-type {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      letter-spacing: .12em;
+      color: rgba(255,255,255,0.4);
+      font-weight: 300;
+      text-transform: uppercase;
+    }
+
+    /* ID / licence tile */
+    .id-item {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color .18s, background .18s;
+      position: relative;
+    }
+
+    .id-item::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 2px;
+      height: 0;
+      background: #000;
+      transition: height .25s ease;
+    }
+
+    .id-item:hover { border-color: #000; background: #fafafa; }
+    .id-item:hover::after { height: 100%; }
+
+    .id-icon { flex-shrink: 0; opacity: 0.55; }
+
+    .id-info { flex: 1; min-width: 0; }
+
+    .id-name {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: #000;
+      letter-spacing: .02em;
+    }
+
+    .id-meta {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      color: #aaa;
+      letter-spacing: .06em;
+      margin-top: 2px;
+      font-weight: 300;
+    }
+
+    .id-arrow {
+      font-size: 12px;
+      color: #ccc;
+      flex-shrink: 0;
+      transition: color .18s, transform .18s;
+    }
+
+    .id-item:hover .id-arrow { color: #000; transform: translateX(3px); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { width: 100%; height: auto; min-height: 420px; }
+      .c-tl, .c-br { width: 60px; height: 60px; }
+      .site-label { display: none; }
+      .title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="root">
+  <div class="bg-grid"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <span class="site-label">Secure · Verification · System</span>
+
+  <div class="card">
+
+    <button class="back-btn" onclick="history.back()">
+      <span class="back-arrow">←</span> Back
+    </button>
+    <p class="step-label">Wallet</p>
+    <div class="divider"></div>
+    <h1 class="title">Your wallet.</h1>
+
+    <div class="wallet-body">
+
+      <!-- Payment Cards -->
+      <div>
+        <p class="section-label">Payment Cards</p>
+        <div id="pay-cards" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+      <!-- ID & Licences -->
+      <div>
+        <p class="section-label">Identity &amp; Licences</p>
+        <div id="id-items" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const payCards = [
+    { bank: 'Chase',       number: '•••• •••• •••• 4821', holder: 'J. Smith', expiry: '09 / 27', type: 'Visa'       },
+    { bank: 'Amex',        number: '•••• •••••• • 3004',  holder: 'J. Smith', expiry: '03 / 26', type: 'Amex'       },
+  ];
+
+  const idItems = [
+    { name: "Driver's Licence", meta: 'New York · Expires 2026'   },
+    { name: 'State ID',         meta: 'New York · Expires 2028'   },
+  ];
+
+  const idIcon = `
+    <svg class="id-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="#000" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="1"/>
+      <circle cx="8" cy="12" r="2.5"/>
+      <line x1="13" y1="10" x2="19" y2="10"/>
+      <line x1="13" y1="14" x2="17" y2="14"/>
+    </svg>`;
+
+  // Render payment cards
+  const payContainer = document.getElementById('pay-cards');
+  payCards.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'pay-card';
+    el.innerHTML = `
+      <div class="pay-card-top">
+        <span class="pay-card-bank">${c.bank}</span>
+        <div class="pay-card-chip"></div>
+      </div>
+      <div class="pay-card-number">${c.number}</div>
+      <div class="pay-card-bottom">
+        <div>
+          <div class="pay-card-label">Card Holder</div>
+          <div class="pay-card-value">${c.holder}</div>
+        </div>
+        <div>
+          <div class="pay-card-label">Expires</div>
+          <div class="pay-card-value">${c.expiry}</div>
+        </div>
+        <div class="pay-card-type">${c.type}</div>
+      </div>`;
+    el.addEventListener('click', () => console.log('Card:', c.bank));
+    payContainer.appendChild(el);
+  });
+
+  // Render ID items
+  const idContainer = document.getElementById('id-items');
+  idItems.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'id-item';
+    el.innerHTML = `
+      ${idIcon}
+      <div class="id-info">
+        <div class="id-name">${item.name}</div>
+        <div class="id-meta">${item.meta}</div>
+      </div>
+      <span class="id-arrow">→</span>`;
+    el.addEventListener('click', () => console.log('ID:', item.name));
+    idContainer.appendChild(el);
+  });
+</script>
+</body>
+</html>

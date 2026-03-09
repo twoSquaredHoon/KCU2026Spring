@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Documents</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Times New Roman', Times, serif;
+      min-height: 100vh;
+    }
+
+    .root {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .corner { position: absolute; pointer-events: none; }
+    .c-tl { top: 32px; left: 32px; width: 100px; height: 100px; border-top: 2px solid #000; border-left: 2px solid #000; }
+    .c-br { bottom: 32px; right: 32px; width: 100px; height: 100px; border-bottom: 2px solid #000; border-right: 2px solid #000; }
+    .c-tr { top: 32px; right: 32px; width: 52px; height: 52px; border-top: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .c-bl { bottom: 32px; left: 32px; width: 52px; height: 52px; border-bottom: 1px solid #ccc; border-left: 1px solid #ccc; }
+
+    .site-label {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .35em;
+      color: #aaa;
+      text-transform: uppercase;
+      white-space: nowrap;
+      font-weight: 300;
+    }
+
+    .card {
+      position: relative;
+      width: 420px;
+      height: 420px;
+      flex-shrink: 0;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 40px 40px 36px;
+      z-index: 1;
+      animation: fadeUp .3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent #ddd transparent transparent;
+    }
+
+    /* Header */
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .22em;
+      color: #aaa;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      margin-bottom: 20px;
+      transition: color .15s;
+      width: fit-content;
+    }
+    .back-btn:hover { color: #000; }
+    .back-arrow { transition: transform .2s; display: inline-block; }
+    .back-btn:hover .back-arrow { transform: translateX(-3px); }
+
+    .step-label {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .3em;
+      color: #bbb;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-weight: 300;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #000;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 34px;
+      font-weight: 300;
+      color: #000;
+      line-height: 1.1;
+      letter-spacing: -.01em;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    /* Document list */
+    .doc-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      scrollbar-width: none;
+    }
+    .doc-list::-webkit-scrollbar { display: none; }
+
+    .doc-item {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color .18s, background .18s;
+      position: relative;
+    }
+
+    .doc-item::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 0;
+      width: 2px;
+      height: 0;
+      background: #000;
+      transition: height .25s ease;
+    }
+
+    .doc-item:hover {
+      border-color: #000;
+      background: #fafafa;
+    }
+
+    .doc-item:hover::after {
+      height: 100%;
+    }
+
+    .doc-icon {
+      flex-shrink: 0;
+      opacity: 0.55;
+    }
+
+    .doc-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .doc-name {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: #000;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .doc-meta {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      color: #aaa;
+      letter-spacing: .06em;
+      margin-top: 2px;
+      font-weight: 300;
+    }
+
+    .doc-arrow {
+      font-size: 12px;
+      color: #ccc;
+      flex-shrink: 0;
+      transition: color .18s, transform .18s;
+    }
+
+    .doc-item:hover .doc-arrow {
+      color: #000;
+      transform: translateX(3px);
+    }
+
+    /* Empty state */
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      opacity: 0.35;
+    }
+
+    .empty-text {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12px;
+      letter-spacing: .12em;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: 300;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { width: 100%; height: auto; min-height: 420px; }
+      .c-tl, .c-br { width: 60px; height: 60px; }
+      .site-label { display: none; }
+      .title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="root">
+  <div class="bg-grid"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <span class="site-label">Secure · Verification · System</span>
+
+  <div class="card">
+
+    <div class="card-header">
+      <button class="back-btn" onclick="history.back()">
+        <span class="back-arrow">←</span> Back
+      </button>
+      <p class="step-label">Documents</p>
+      <div class="divider"></div>
+      <h1 class="title">Your files.</h1>
+    </div>
+
+    <div class="doc-list" id="doc-list">
+      <!-- Populated by JS -->
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const docs = [
+    { name: 'Passport',          meta: 'Identity · Expires 2029',    },
+    { name: "Driver's Licence",  meta: 'Identity · Expires 2026',    },
+    { name: 'Insurance Card',    meta: 'Insurance · Valid',           },
+    { name: 'Birth Certificate', meta: 'Identity · Issued 1990',      },
+    { name: 'Tax Return 2023',   meta: 'Financial · Filed',           },
+  ];
+
+  const docIcon = `
+    <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="#000" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="8" y1="13" x2="16" y2="13"/>
+      <line x1="8" y1="17" x2="13" y2="17"/>
+    </svg>`;
+
+  const list = document.getElementById('doc-list');
+
+  if (docs.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.2">
+          <path d="M14 2H6a1 1 0 0 0-1 1v18a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span class="empty-text">No documents</span>
+      </div>`;
+  } else {
+    docs.forEach((doc, i) => {
+      const el = document.createElement('div');
+      el.className = 'doc-item';
+      el.style.animationDelay = `${i * 60}ms`;
+      el.innerHTML = `
+        ${docIcon}
+        <div class="doc-info">
+          <div class="doc-name">${doc.name}</div>
+          <div class="doc-meta">${doc.meta}</div>
+        </div>
+        <span class="doc-arrow">→</span>`;
+      el.addEventListener('click', () => {
+        console.log('Opened:', doc.name);
+        // Navigate to document detail view
+      });
+      list.appendChild(el);
+    });
+  }
+</script>
+</body>
+</html>

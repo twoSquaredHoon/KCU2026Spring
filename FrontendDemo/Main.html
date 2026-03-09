@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Main</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Times New Roman', Times, serif;
+      min-height: 100vh;
+    }
+
+    .root {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .corner { position: absolute; pointer-events: none; }
+    .c-tl { top: 32px; left: 32px; width: 100px; height: 100px; border-top: 2px solid #000; border-left: 2px solid #000; }
+    .c-br { bottom: 32px; right: 32px; width: 100px; height: 100px; border-bottom: 2px solid #000; border-right: 2px solid #000; }
+    .c-tr { top: 32px; right: 32px; width: 52px; height: 52px; border-top: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .c-bl { bottom: 32px; left: 32px; width: 52px; height: 52px; border-bottom: 1px solid #ccc; border-left: 1px solid #ccc; }
+
+    .site-label {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .35em;
+      color: #aaa;
+      text-transform: uppercase;
+      white-space: nowrap;
+      font-weight: 300;
+    }
+
+    /* Main card — wider than the OTP cards to hold two side-by-side */
+    .card {
+      position: relative;
+      width: 420px;
+      height: 420px;
+      flex-shrink: 0;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 40px 40px 36px;
+      z-index: 1;
+      animation: fadeUp .3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent #ddd transparent transparent;
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step-label {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 10px;
+      letter-spacing: .3em;
+      color: #bbb;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      font-weight: 300;
+    }
+
+    .divider {
+      width: 32px;
+      height: 1px;
+      background: #000;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 34px;
+      font-weight: 300;
+      color: #000;
+      line-height: 1.1;
+      letter-spacing: -.01em;
+      font-family: 'Times New Roman', Times, serif;
+    }
+
+    /* Two category tiles */
+    .categories {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+      margin-top: 28px;
+    }
+
+    .cat {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 18px 18px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cat::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0;
+      height: 2px;
+      background: #000;
+      transition: width .3s ease;
+    }
+
+    .cat:hover {
+      border-color: #000;
+      background: #fafafa;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    .cat:hover::after {
+      width: 100%;
+    }
+
+    .cat-icon {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 0;
+      opacity: 0.7;
+    }
+
+    .cat-spacer { flex: 1; }
+
+    .cat-name {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 16px;
+      font-weight: 400;
+      color: #000;
+      letter-spacing: .02em;
+      margin-bottom: 4px;
+    }
+
+    .cat-desc {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11px;
+      color: #999;
+      font-weight: 300;
+      letter-spacing: .04em;
+    }
+
+    .cat-arrow {
+      position: absolute;
+      bottom: 18px;
+      right: 18px;
+      font-size: 14px;
+      color: #ccc;
+      transition: color .2s, transform .2s;
+    }
+
+    .cat:hover .cat-arrow {
+      color: #000;
+      transform: translateX(3px);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { width: 100%; height: auto; min-height: 420px; }
+      .c-tl, .c-br { width: 60px; height: 60px; }
+      .site-label { display: none; }
+      .title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="root">
+  <div class="bg-grid"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <span class="site-label">Secure · Verification · System</span>
+
+  <div class="card">
+
+    <div class="card-header">
+      <p class="step-label">Select Category</p>
+      <div class="divider"></div>
+      <h1 class="title">What would<br>you like to access?</h1>
+    </div>
+
+    <div class="categories">
+
+      <!-- Documents -->
+      <div class="cat" onclick="select('documents')">
+        <svg class="cat-icon" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="3" width="16" height="22" rx="0"/>
+          <path d="M6 3h11l5 5v17H6z"/>
+          <path d="M17 3v5h5"/>
+          <line x1="10" y1="13" x2="22" y2="13"/>
+          <line x1="10" y1="17" x2="22" y2="17"/>
+          <line x1="10" y1="21" x2="16" y2="21"/>
+        </svg>
+        <div class="cat-spacer"></div>
+        <div class="cat-name">Documents</div>
+        <div class="cat-desc">Files &amp; records</div>
+        <span class="cat-arrow">→</span>
+      </div>
+
+      <!-- Wallet -->
+      <div class="cat" onclick="select('wallet')">
+        <svg class="cat-icon" viewBox="0 0 32 32" fill="none" stroke="#000" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="26" height="18" rx="0"/>
+          <path d="M3 13h26"/>
+          <path d="M21 19h4"/>
+          <circle cx="23" cy="19" r="1" fill="#000" stroke="none"/>
+          <path d="M7 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+        </svg>
+        <div class="cat-spacer"></div>
+        <div class="cat-name">Wallet</div>
+        <div class="cat-desc">Cards &amp; payments</div>
+        <span class="cat-arrow">→</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function select(category) {
+    console.log('Selected:', category);
+    // Navigation placeholder — wire to Documents or Wallet screen
+  }
+</script>
+</body>
+</html>
