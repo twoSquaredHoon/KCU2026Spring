@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enter Phone Number</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    .root {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .corner { position: absolute; pointer-events: none; }
+    .c-tl { top: 32px; left: 32px; width: 100px; height: 100px; border-top: 2px solid #000; border-left: 2px solid #000; }
+    .c-br { bottom: 32px; right: 32px; width: 100px; height: 100px; border-bottom: 2px solid #000; border-right: 2px solid #000; }
+    .c-tr { top: 32px; right: 32px; width: 52px; height: 52px; border-top: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .c-bl { bottom: 32px; left: 32px; width: 52px; height: 52px; border-bottom: 1px solid #ccc; border-left: 1px solid #ccc; }
+
+    .site-label {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .3em;
+      color: #aaa;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 52px 44px 44px;
+      z-index: 1;
+      animation: fadeUp .3s ease;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent #ddd transparent transparent;
+    }
+
+    .step-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .25em;
+      color: #bbb;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .divider {
+      width: 32px;
+      height: 2px;
+      background: #000;
+      margin-bottom: 28px;
+    }
+
+    .title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.05;
+      margin-bottom: 10px;
+      letter-spacing: -.02em;
+    }
+
+    .sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .22em;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .phone-wrap {
+      position: relative;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .phone-prefix {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #aaa;
+      padding: 4px 0 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .phone-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid #ccc;
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 4px 0 10px;
+      outline: none;
+      letter-spacing: .04em;
+      transition: border-color .2s;
+    }
+
+    .phone-input:focus { border-bottom-color: #000; }
+    .phone-input::placeholder { color: #ccc; }
+
+    .focus-line {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: #000;
+      width: 0;
+      transition: width .35s ease;
+    }
+
+    .phone-input:focus ~ .focus-line { width: 100%; }
+
+    .btn {
+      width: 100%;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 17px 24px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) { background: #222; }
+    .btn:active:not(:disabled) { background: #444; }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .arrow { transition: transform .2s; display: inline-block; }
+    .btn:hover .arrow { transform: translateX(4px); }
+
+    .err {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: #cc0000;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 480px) {
+      .card { padding: 40px 28px 32px; }
+      .title { font-size: 30px; }
+      .c-tl, .c-br { width: 60px; height: 60px; }
+      .site-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="root">
+  <div class="bg-grid"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <span class="site-label">Secure · Verification · System</span>
+
+  <div class="card">
+    <p class="step-label">Step 01 — Identity</p>
+    <div class="divider"></div>
+    <h1 class="title">Enter your<br>number.</h1>
+    <p class="sub">We'll send a one-time code<br>to confirm it's you.</p>
+    <label class="lbl" for="phone-input">Phone number</label>
+    <div class="phone-wrap">
+      <span class="phone-prefix">+1</span>
+      <input class="phone-input" id="phone-input" type="tel" placeholder="(555) 000-0000" autocomplete="tel" maxlength="14" />
+      <div class="focus-line"></div>
+    </div>
+    <div class="err" id="err-phone" style="display:none">⚠ <span></span></div>
+    <button class="btn" id="btn-send">Send Code <span class="arrow">→</span></button>
+  </div>
+</div>
+
+<script>
+  const phoneInput = document.getElementById('phone-input');
+  const btnSend = document.getElementById('btn-send');
+  const errPhone = document.getElementById('err-phone');
+
+  function showErr(msg) {
+    errPhone.style.display = 'flex';
+    errPhone.querySelector('span').textContent = msg;
+  }
+
+  function hideErr() {
+    errPhone.style.display = 'none';
+  }
+
+  // Auto-format as (XXX) XXX-XXXX
+  phoneInput.addEventListener('input', e => {
+    hideErr();
+    let digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    let formatted = '';
+    if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
+    if (digits.length >= 4) formatted += ') ' + digits.slice(3, 6);
+    if (digits.length >= 7) formatted += '-' + digits.slice(6, 10);
+    phoneInput.value = formatted;
+  });
+
+  phoneInput.addEventListener('keydown', e => { if (e.key === 'Enter') btnSend.click(); });
+
+  btnSend.addEventListener('click', () => {
+    const digits = phoneInput.value.replace(/\D/g, '');
+    if (digits.length !== 10) {
+      showErr('Enter a valid 10-digit number.');
+      return;
+    }
+    hideErr();
+    btnSend.disabled = true;
+    btnSend.innerHTML = '<span class="spin"></span> Sending…';
+
+    setTimeout(() => {
+      btnSend.disabled = false;
+      btnSend.innerHTML = 'Send Code <span class="arrow">→</span>';
+      // In a real app, navigate to check-messages.html here
+      alert('Code sent! Proceed to the Check Messages screen.');
+    }, 1200);
+  });
+</script>
+</body>
+</html>

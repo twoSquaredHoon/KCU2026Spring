@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Check Messages</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+    }
+
+    .root {
+      min-height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .corner { position: absolute; pointer-events: none; }
+    .c-tl { top: 32px; left: 32px; width: 100px; height: 100px; border-top: 2px solid #000; border-left: 2px solid #000; }
+    .c-br { bottom: 32px; right: 32px; width: 100px; height: 100px; border-bottom: 2px solid #000; border-right: 2px solid #000; }
+    .c-tr { top: 32px; right: 32px; width: 52px; height: 52px; border-top: 1px solid #ccc; border-right: 1px solid #ccc; }
+    .c-bl { bottom: 32px; left: 32px; width: 52px; height: 52px; border-bottom: 1px solid #ccc; border-left: 1px solid #ccc; }
+
+    .site-label {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .3em;
+      color: #aaa;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      padding: 52px 44px 44px;
+      z-index: 1;
+      animation: fadeUp .3s ease;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 28px; height: 28px;
+      background: #ffffff;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent #ddd transparent transparent;
+    }
+
+    .title {
+      font-size: 38px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1.05;
+      margin-bottom: 36px;
+      letter-spacing: -.02em;
+    }
+
+    .otp-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      justify-content: space-between;
+    }
+
+    .otp-cell {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      background: #fff;
+      border: 2px solid #ddd;
+      color: #000;
+      font-family: 'DM Mono', monospace;
+      font-size: 24px;
+      font-weight: 500;
+      text-align: center;
+      outline: none;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      caret-color: transparent;
+      cursor: default;
+      user-select: none;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .otp-cell.active {
+      border-color: #000;
+      background: #f5f5f5;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
+    }
+    .otp-cell.filled { border-color: #000; background: #000; color: #fff; }
+    .otp-cell.disabled { border-color: #eee; background: #fafafa; color: #ccc; cursor: not-allowed; }
+
+    .err {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: #cc0000;
+      letter-spacing: .08em;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn {
+      width: 100%;
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 17px 24px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) { background: #222; }
+    .btn:active:not(:disabled) { background: #444; }
+    .btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .arrow { transition: transform .2s; display: inline-block; }
+    .btn:hover .arrow { transform: translateX(4px); }
+
+    .spin {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+    }
+
+    /* Success state */
+    .success-view { display: none; text-align: left; }
+    .success-view.show { display: block; animation: fadeUp .3s ease; }
+    .otp-view { display: block; }
+    .otp-view.hide { display: none; }
+
+    .success-ring {
+      width: 72px;
+      height: 72px;
+      border: 2px solid #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      animation: pop .45s cubic-bezier(.175,.885,.32,1.275);
+    }
+
+    .check {
+      width: 30px;
+      height: 30px;
+      stroke: #000;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-dasharray: 52;
+      stroke-dashoffset: 52;
+      animation: draw .5s .35s ease forwards;
+    }
+
+    .step-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .25em;
+      color: #bbb;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    .divider {
+      width: 32px;
+      height: 2px;
+      background: #000;
+      margin-bottom: 28px;
+    }
+
+    .sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 0;
+      line-height: 1.7;
+    }
+
+    .btn-ghost {
+      background: none;
+      border: 1px solid #ccc;
+      color: #888;
+      padding: 15px 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 18px;
+      transition: border-color .15s, color .15s;
+    }
+
+    .btn-ghost:hover { border-color: #000; color: #000; }
+
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes draw { to { stroke-dashoffset: 0; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 480px) {
+      .card { padding: 40px 28px 32px; }
+      .title { font-size: 30px; }
+      .c-tl, .c-br { width: 60px; height: 60px; }
+      .site-label { display: none; }
+      .otp-cell { width: 42px; height: 42px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="root">
+  <div class="bg-grid"></div>
+  <div class="corner c-tl"></div>
+  <div class="corner c-br"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <span class="site-label">Secure · Verification · System</span>
+
+  <div class="card">
+
+    <!-- OTP entry view -->
+    <div class="otp-view" id="otp-view">
+      <h1 class="title">Enter 6-digit<br>code.</h1>
+      <div class="otp-row">
+        <div class="otp-cell disabled" data-idx="0"></div>
+        <div class="otp-cell disabled" data-idx="1"></div>
+        <div class="otp-cell disabled" data-idx="2"></div>
+        <div class="otp-cell disabled" data-idx="3"></div>
+        <div class="otp-cell disabled" data-idx="4"></div>
+        <div class="otp-cell disabled" data-idx="5"></div>
+        <input id="hidden-input" type="text" inputmode="numeric" maxlength="1"
+          style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" autocomplete="off" />
+      </div>
+      <div class="err" id="err-otp" style="display:none">⚠ <span></span></div>
+      <button class="btn" id="btn-verify">Confirm <span class="arrow">→</span></button>
+    </div>
+
+    <!-- Success view -->
+    <div class="success-view" id="success-view">
+      <p class="step-label">Verified</p>
+      <div class="divider"></div>
+      <div class="success-ring">
+        <svg class="check" viewBox="0 0 30 30"><polyline points="5,15 12,22 25,8" /></svg>
+      </div>
+      <h1 class="title">You're<br>verified.</h1>
+      <p class="sub">Identity confirmed successfully.</p>
+      <button class="btn-ghost" id="btn-reset">↩ Start over</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const OTP_LENGTH = 6;
+  // For demo: a hardcoded OTP. In production this would come from the server.
+  const DEMO_OTP = String(Math.floor(100000 + Math.random() * 900000));
+  console.log('Demo OTP:', DEMO_OTP); // visible in browser console for testing
+
+  const cells = Array.from(document.querySelectorAll('.otp-cell'));
+  const hiddenInput = document.getElementById('hidden-input');
+  const btnVerify = document.getElementById('btn-verify');
+  const errOtp = document.getElementById('err-otp');
+  const otpView = document.getElementById('otp-view');
+  const successView = document.getElementById('success-view');
+  const btnReset = document.getElementById('btn-reset');
+
+  let digits = [];
+  let activeIdx = 0;
+
+  function showErr(msg) {
+    errOtp.style.display = 'flex';
+    errOtp.querySelector('span').textContent = msg;
+  }
+  function hideErr() { errOtp.style.display = 'none'; }
+
+  function render() {
+    cells.forEach((cell, i) => {
+      cell.classList.remove('active', 'filled', 'disabled');
+      if (i < digits.length) {
+        cell.textContent = digits[i];
+        cell.classList.add('filled');
+      } else if (i === digits.length) {
+        cell.textContent = '';
+        cell.classList.add('active');
+      } else {
+        cell.textContent = '';
+        cell.classList.add('disabled');
+      }
+    });
+  }
+
+  function activateInput() {
+    hiddenInput.value = '';
+    hiddenInput.focus();
+  }
+
+  // Clicking any filled cell or the active cell focuses input
+  cells.forEach((cell, i) => {
+    cell.addEventListener('click', () => {
+      if (!cell.classList.contains('disabled')) activateInput();
+    });
+  });
+
+  hiddenInput.addEventListener('keydown', e => {
+    if (e.key === 'Backspace') {
+      if (digits.length > 0) { digits.pop(); render(); hideErr(); }
+      e.preventDefault();
+      return;
+    }
+    if (e.key === 'Enter') { btnVerify.click(); return; }
+  });
+
+  hiddenInput.addEventListener('input', e => {
+    const digit = hiddenInput.value.replace(/\D/g, '').slice(-1);
+    hiddenInput.value = '';
+    if (digit && digits.length < OTP_LENGTH) {
+      digits.push(digit);
+      render();
+      hideErr();
+    }
+  });
+
+  // Prevent losing focus from hidden input while entering
+  document.querySelector('.otp-row').addEventListener('mousedown', e => {
+    e.preventDefault();
+    activateInput();
+  });
+
+  btnVerify.addEventListener('click', () => {
+    const entered = digits.join('');
+    if (entered.length < OTP_LENGTH) { showErr('Enter all 6 digits.'); return; }
+    btnVerify.disabled = true;
+    btnVerify.innerHTML = '<span class="spin"></span> Verifying…';
+
+    setTimeout(() => {
+      btnVerify.disabled = false;
+      btnVerify.innerHTML = 'Confirm <span class="arrow">→</span>';
+      if (entered === DEMO_OTP) {
+        otpView.classList.add('hide');
+        successView.classList.add('show');
+      } else {
+        showErr('Incorrect code. Try again.');
+        digits = [];
+        render();
+        setTimeout(() => activateInput(), 50);
+      }
+    }, 900);
+  });
+
+  btnReset.addEventListener('click', () => {
+    digits = [];
+    render();
+    hideErr();
+    successView.classList.remove('show');
+    otpView.classList.remove('hide');
+    setTimeout(() => activateInput(), 50);
+  });
+
+  // Init
+  render();
+  setTimeout(() => activateInput(), 100);
+</script>
+</body>
+</html>
