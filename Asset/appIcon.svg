@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- App background: deep navy -->
+    <linearGradient id="appBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E1E3A"/>
+      <stop offset="100%" style="stop-color:#2E2E50"/>
+    </linearGradient>
+
+    <!-- Card 1 (back) - refined pink/magenta -->
+    <linearGradient id="card1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF2AB0"/>
+      <stop offset="100%" style="stop-color:#CC0088"/>
+    </linearGradient>
+
+    <!-- Card 2 (middle) - refined blue -->
+    <linearGradient id="card2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6B9FFF"/>
+      <stop offset="100%" style="stop-color:#3D6FCC"/>
+    </linearGradient>
+
+    <!-- Card 2 dark corner -->
+    <linearGradient id="card2dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3E4468"/>
+      <stop offset="100%" style="stop-color:#2A2E50"/>
+    </linearGradient>
+
+    <!-- Card 1 dark corner -->
+    <linearGradient id="card1dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#840000"/>
+      <stop offset="100%" style="stop-color:#5A0000"/>
+    </linearGradient>
+
+    <!-- Card 3 (front) - refined warm grey -->
+    <linearGradient id="card3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A0A0A8"/>
+      <stop offset="100%" style="stop-color:#6E6E78"/>
+    </linearGradient>
+
+    <!-- Subtle inner glow on app box -->
+    <filter id="innerGlow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="cardShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="10" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+
+    <!-- Scale transform: original is 225x197, we want it ~300px wide, centered at 256,256 -->
+    <!-- scale = 300/225 = 1.333, height = 197*1.333 = 262.7 -->
+    <!-- centered: x offset = (512 - 300) / 2 = 106, y offset = (512 - 263) / 2 = 124.5 -->
+  </defs>
+
+  <!-- App icon rounded square background -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#appBg)"/>
+
+  <!-- Subtle radial highlight at center -->
+  <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" style="stop-color:#ffffff; stop-opacity:0.04"/>
+    <stop offset="100%" style="stop-color:#ffffff; stop-opacity:0"/>
+  </radialGradient>
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#centerGlow)"/>
+
+  <!-- Cards group, scaled and centered -->
+  <g filter="url(#cardShadow)" transform="translate(76, 98) scale(1.6)">
+
+    <!-- Card 1 (back, magenta) -->
+    <rect width="225" height="143" rx="15" fill="url(#card1)"/>
+
+    <!-- Card 2 (middle, blue) -->
+    <rect y="26" width="225" height="113" rx="15" fill="url(#card2)"/>
+
+    <!-- Card 1 dark sweep (top-right corner) -->
+    <path d="M210 0C218.284 0 225 6.71573 225 15V128C225 136.284 218.284 143 210 143H15C6.71573 143 1.97317e-07 136.284 0 128V102.404C101.028 90.5777 180.633 50.7075 204.582 0H210Z" fill="url(#card1dark)"/>
+
+    <!-- Card 2 dark sweep -->
+    <path d="M210 26C218.284 26 225 32.7157 225 41V124C225 132.284 218.284 139 210 139H15C6.71573 139 0 132.284 0 124V102.404C83.0077 92.6872 151.552 64.0372 186.647 26H210Z" fill="url(#card2dark)"/>
+
+    <!-- Card 3 (front, grey) -->
+    <rect y="54" width="225" height="143" rx="15" fill="url(#card3)"/>
+
+    <!-- White highlight sweep on card 3 -->
+    <path d="M152.187 54C114.332 77.8504 61.0822 95.2538 0 102.404V69C9.34234e-07 60.7157 6.71573 54 15 54H152.187Z" fill="white" fill-opacity="0.35"/>
+
+
+
+  </g>
+
+  <!-- Thin border overlay for polish -->
+  <rect width="512" height="512" rx="112" ry="112" fill="none" stroke="white" stroke-width="1" stroke-opacity="0.07"/>
+
+</svg>
